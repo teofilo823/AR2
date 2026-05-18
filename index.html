@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR2 Brasil | Ranked</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #5865F2; --bg: #0e0e10; --card: #1c1c1f; --accent: #00d1ff; --text: #ffffff; --win: #2ecc71; --loss: #e74c3c; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; padding: 20px; }
+        .container { width: 100%; max-width: 850px; }
+        
+        #login-screen { text-align: center; margin-top: 15vh; }
+        #main-content { display: none; width: 100%; }
+        .logo-gif { width: 150px; height: 150px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 20px; object-fit: cover; }
+
+        .user-bar { background: var(--card); padding: 15px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border: 1px solid #303033; }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        
+        /* Estilo para Avatar ou Inicial */
+        .avatar-img, .avatar-letter { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
+        .avatar-letter { display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; text-transform: uppercase; border: 2px solid rgba(255,255,255,0.2); }
+
+        .btn-elos { 
+            background: linear-gradient(45deg, #f1c40f, #d4af37); 
+            color: #000; border: none; padding: 10px 20px; border-radius: 8px; 
+            font-weight: bold; cursor: pointer; font-size: 0.8rem; 
+            display: flex; align-items: center; gap: 8px; transition: 0.3s; 
+            margin-bottom: 15px; margin-left: auto;
+        }
+        .btn-elos:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(241, 196, 15, 0.4); }
+
+        .table-card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #303033; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #252529; padding: 15px; text-align: left; color: #888; font-size: 0.75rem; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid #28282b; transition: 0.2s; }
+        tr:hover td { background: #252529; cursor: pointer; }
+        
+        .row-me { background: rgba(88, 101, 242, 0.1) !important; border-left: 4px solid var(--primary); }
+        .btn-discord { background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; }
+        .btn-logout { background: transparent; color: #ff4757; border: 1px solid #ff4757; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+
+        #modal, #modal-elos { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(8px); }
+        .modal-content { background: var(--card); padding: 25px; border-radius: 20px; width: 360px; text-align: center; border: 1px solid #333; position: relative; }
+        
+        .progress-container { background: #252529; height: 10px; border-radius: 10px; margin: 15px 0 5px 0; overflow: hidden; border: 1px solid #333; }
+        .progress-bar { background: var(--primary); height: 100%; width: 0%; transition: 1s ease-in-out; }
+        .next-elo-text { font-size: 0.7rem; color: #888; margin-bottom: 15px; }
+
+        .stat-box { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .stat-item { background: #252529; padding: 10px; border-radius: 8px; border: 1px solid #303033; }
+
+        .elos-grid { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.8rem; }
+        .elos-grid td { padding: 8px 5px; border-bottom: 1px solid #28282b; }
+        
+        .c-lenda { color: #ff3e3e !important; }
+        .c-mestre { color: #9b59b6 !important; }
+        .c-diamante { color: #3498db !important; }
+        .c-platina { color: #2ecc71 !important; }
+        .c-ouro { color: #f1c40f !important; }
+        .c-prata { color: #95a5a6 !important; }
+        .c-bronze { color: #e67e22 !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="login-screen">
+        <img src="logo.gif" class="logo-gif" onerror="this.src='https://i.imgur.com/8N99X7p.gif'">
+        <h1 style="margin-bottom: 30px; letter-spacing: 2px;">AR2 BRASIL RANKED</h1>
+        <a id="login-link" class="btn-discord">
+            <i class="fa-brands fa-discord"></i> ENTRAR COM DISCORD
+        </a>
+    </div>
+
+    <div id="main-content">
+        <div class="user-bar">
+            <div class="user-info" id="user-display"></div>
+            <button class="btn-logout" onclick="logout()">SAIR</button>
+        </div>
+
+        <button class="btn-elos" onclick="openElosModal()">
+            <i class="fa-solid fa-trophy"></i> TABELA DE ELOS
+        </button>
+
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr><th>#</th><th>JOGADOR</th><th>W / L</th><th>WINRATE</th><th>TROFÉUS</th></tr>
+                </thead>
+                <tbody id="leaderboard-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="modal" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div id="m-avatar-box" style="display: flex; justify-content: center; margin-bottom: 15px;"></div>
+        
+        <h2 id="m-name"></h2>
+        <div id="m-elo-tag" style="font-weight: bold; font-size: 1.1rem; margin: 5px 0;"></div>
+        <p id="m-id" style="font-size: 0.65rem; color: #555; margin-bottom: 10px;"></p>
+        
+        <div class="progress-container">
+            <div id="m-bar" class="progress-bar"></div>
+        </div>
+        <p id="m-next-text" class="next-elo-text"></p>
+
+        <div class="stat-box">
+            <div class="stat-item"><small>Partidas</small><br><b id="m-total">0</b></div>
+            <div class="stat-item"><small>Winrate</small><br><b id="m-wr" style="color:var(--accent)">0%</b></div>
+            <div class="stat-item"><small>Vitórias</small><br><b id="m-wins" style="color:var(--win)">0</b></div>
+            <div class="stat-item"><small>Derrotas</small><br><b id="m-losses" style="color:var(--loss)">0</b></div>
+        </div>
+
+        <button onclick="closeModal()" style="margin-top: 25px; background: #333; color: white; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; width: 100%;">Fechar</button>
+    </div>
+</div>
+
+<div id="modal-elos" onclick="closeElosModal()">
+    <div class="modal-content" onclick="event.stopPropagation()" style="width: 400px;">
+        <h2 style="color: #f1c40f; margin-bottom: 10px;">🏆 REQUISITOS DE RANK</h2>
+        <table class="elos-grid">
+            <tr class="c-lenda"><td>🏆 LENDA</td><td style="text-align:right">4000+</td></tr>
+            <tr class="c-mestre"><td>🔥 MESTRE III / II / I</td><td style="text-align:right">3500 / 3000 / 2500</td></tr>
+            <tr class="c-diamante"><td>💎 DIAMANTE III / II / I</td><td style="text-align:right">2200 / 1900 / 1600</td></tr>
+            <tr class="c-platina"><td>❄️ PLATINA III / II / I</td><td style="text-align:right">1350 / 1100 / 900</td></tr>
+            <tr class="c-ouro"><td>⭐ OURO III / II / I</td><td style="text-align:right">780 / 660 / 550</td></tr>
+            <tr class="c-prata"><td>🥈 PRATA III / II / I</td><td style="text-align:right">450 / 350 / 250</td></tr>
+            <tr class="c-bronze"><td>🥉 BRONZE III / II / I</td><td style="text-align:right">160 / 80 / 0</td></tr>
+        </table>
+        <button onclick="closeElosModal()" style="margin-top: 20px; background: #f1c40f; color: #000; border: none; padding: 10px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold;">ENTENDIDO</button>
+    </div>
+</div>
+
+<script>
+    const CLIENT_ID = '1363856919638573277';
+    const SITE_URL = 'https://teofilo823.github.io/SITE-AR2-BR/'; 
+    const JSON_URL = 'https://raw.githubusercontent.com/teofilo823/SITE-AR2-BR/main/database.json';
+
+    const RANKS = [
+        { name: "BRONZE I", min: 0, color: "c-bronze" }, { name: "BRONZE II", min: 80, color: "c-bronze" }, { name: "BRONZE III", min: 160, color: "c-bronze" },
+        { name: "PRATA I", min: 250, color: "c-prata" }, { name: "PRATA II", min: 350, color: "c-prata" }, { name: "PRATA III", min: 450, color: "c-prata" },
+        { name: "OURO I", min: 550, color: "c-ouro" }, { name: "OURO II", min: 660, color: "c-ouro" }, { name: "OURO III", min: 780, color: "c-ouro" },
+        { name: "PLATINA I", min: 900, color: "c-platina" }, { name: "PLATINA II", min: 1100, color: "c-platina" }, { name: "PLATINA III", min: 1350, color: "c-platina" },
+        { name: "DIAMANTE I", min: 1600, color: "c-diamante" }, { name: "DIAMANTE II", min: 1900, color: "c-diamante" }, { name: "DIAMANTE III", min: 2200, color: "c-diamante" },
+        { name: "MESTRE I", min: 2500, color: "c-mestre" }, { name: "MESTRE II", min: 3000, color: "c-mestre" }, { name: "MESTRE III", min: 3500, color: "c-mestre" },
+        { name: "LENDA", min: 4000, color: "c-lenda" }
+    ];
+
+    // Função para criar o elemento de Avatar (Foto ou Inicial)
+    function getAvatarHtml(name, id, hash, size = "40px") {
+        if (hash) {
+            return `<img src="https://cdn.discordapp.com/avatars/${id}/${hash}.png" class="avatar-img" style="width:${size}; height:${size}" onerror="this.outerHTML='${getLetterAvatar(name, size)}'">`;
+        }
+        return getLetterAvatar(name, size);
+    }
+
+    function getLetterAvatar(name, size) {
+        const char = name ? name.charAt(0).toUpperCase() : '?';
+        const colors = ['#5865F2', '#2ECC71', '#E67E22', '#E91E63', '#9B59B6', '#F1C40F', '#3498DB'];
+        const color = colors[char.charCodeAt(0) % colors.length];
+        return `<div class="avatar-letter" style="width:${size}; height:${size}; background-color:${color}; font-size: calc(${size} / 2)">${char}</div>`;
+    }
+
+    function getEloInfo(trophies) {
+        let current = RANKS[0];
+        let next = null;
+        for (let i = 0; i < RANKS.length; i++) {
+            if (trophies >= RANKS[i].min) {
+                current = RANKS[i];
+                next = RANKS[i + 1] || null;
+            }
+        }
+        return { current, next };
+    }
+
+    document.getElementById('login-link').href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(SITE_URL)}&response_type=token&scope=identify`;
+
+    window.onload = () => {
+        const hash = new URLSearchParams(window.location.hash.slice(1));
+        const token = hash.get('access_token');
+        if (token) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            fetchUser(token);
+        }
+    };
+
+    async function fetchUser(token) {
+        try {
+            const res = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${token}` } });
+            const user = await res.json();
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            
+            // Avatar do usuário logado na barra superior
+            document.getElementById('user-display').innerHTML = `
+                ${getAvatarHtml(user.username, user.id, user.avatar, "40px")}
+                <b>${user.username}</b>
+            `;
+            loadData(user.id);
+        } catch (e) { console.error(e); }
+    }
+
+    async function loadData(myId) {
+        try {
+            const res = await fetch(JSON_URL + '?v=' + Date.now());
+            const data = await res.json();
+            const body = document.getElementById('leaderboard-body');
+            body.innerHTML = '';
+            
+            const users = data.users || {};
+            const sorted = Object.entries(users).sort((a,b) => (b[1].trophies || 0) - (a[1].trophies || 0));
+
+            sorted.forEach(([id, u], i) => {
+                const trophies = u.trophies || 0;
+                const wins = u.wins || 0;
+                const losses = u.losses || 0;
+                const total = wins + losses;
+                const wr = total > 0 ? ((wins / total) * 100).toFixed(1) : "0";
+                const playerName = u.name || `Jogador`;
+
+                const tr = document.createElement('tr');
+                if (id === myId) tr.className = 'row-me';
+                
+                tr.onclick = () => {
+                    const eloData = getEloInfo(trophies);
+                    document.getElementById('m-name').innerText = playerName;
+                    document.getElementById('m-id').innerText = "ID: " + id;
+                    
+                    // Coloca o avatar grande no modal
+                    document.getElementById('m-avatar-box').innerHTML = getAvatarHtml(playerName, id, u.avatar, "100px");
+                    
+                    document.getElementById('m-total').innerText = total;
+                    document.getElementById('m-wins').innerText = wins;
+                    document.getElementById('m-losses').innerText = losses;
+                    document.getElementById('m-wr').innerText = wr + '%';
+                    
+                    const eloTag = document.getElementById('m-elo-tag');
+                    eloTag.innerText = eloData.current.name + " (" + trophies + " 🏆)";
+                    eloTag.className = eloData.current.color;
+
+                    const bar = document.getElementById('m-bar');
+                    const nextText = document.getElementById('m-next-text');
+
+                    if (eloData.next) {
+                        const diff = eloData.next.min - eloData.current.min;
+                        const progress = trophies - eloData.current.min;
+                        const percent = Math.min(100, Math.max(0, (progress / diff) * 100));
+                        bar.style.width = percent + "%";
+                        bar.style.background = `var(--primary)`;
+                        nextText.innerText = `Faltam ${eloData.next.min - trophies} troféus para ${eloData.next.name}`;
+                    } else {
+                        bar.style.width = "100%";
+                        bar.style.background = "gold";
+                        nextText.innerText = "VOCÊ ESTÁ NO TOPO! 🏆";
+                    }
+
+                    document.getElementById('modal').style.display = 'flex';
+                };
+
+                tr.innerHTML = `
+                    <td>#${i+1}</td>
+                    <td style="display:flex; align-items:center; gap:10px;">
+                        ${getAvatarHtml(playerName, id, u.avatar, "30px")}
+                        <span style="color:var(--accent); font-weight:bold">${playerName}</span>
+                    </td>
+                    <td>${wins}V / ${losses}D</td>
+                    <td>${wr}%</td>
+                    <td style="color:#f1c40f; font-weight:bold">${trophies} 🏆</td>
+                `;
+                body.appendChild(tr);
+            });
+        } catch (e) { console.error("Erro ao carregar dados."); }
+    }
+
+    function closeModal() { document.getElementById('modal').style.display = 'none'; }
+    function openElosModal() { document.getElementById('modal-elos').style.display = 'flex'; }
+    function closeElosModal() { document.getElementById('modal-elos').style.display = 'none'; }
+    function logout() { window.location.href = SITE_URL; }
+</script>
+</body>
+</html>
